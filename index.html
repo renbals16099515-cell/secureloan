@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>K-easy Loan</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
 <script>
 function showErr(m){var a=document.getElementById("app");if(a)a.innerHTML='<div class="card msg"><b>Error:</b> '+String(m)+'<br><br><button onclick="location.reload()">Reload</button></div>'}
-window.onerror=function(m){showErr(m)};window.onunhandledrejection=function(e){showErr(e.reason&&e.reason.message||e.reason)};
+window.onerror=function(m,s,l){showErr(m+" | "+(s||"").split("/").slice(-2).join("/")+" line "+l)};window.onunhandledrejection=function(e){showErr(e.reason&&e.reason.message||e.reason)};
 </script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#111827}
