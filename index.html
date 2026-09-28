@@ -2,6 +2,11 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>K-easy Loan</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>')</script>
+<script>
+function showErr(m){var a=document.getElementById("app");if(a)a.innerHTML='<div class="card msg"><b>Error:</b> '+String(m)+'<br><br><button onclick="location.reload()">Reload</button></div>'}
+window.onerror=function(m){showErr(m)};window.onunhandledrejection=function(e){showErr(e.reason&&e.reason.message||e.reason)};
+</script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#111827}
 header{background:#0f172a;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
@@ -24,8 +29,3 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px;borde
 <script>
 const sb=supabase.createClient("https://dccqbuzxpipsdqrjzwzk.supabase.co","sb_publishable_b0HdhcRDtGP9a_ftZ1vIqg_XxlhesJf");
 const $=id=>document.getElementById(id),app=$("app");
-const M=n=>"₱"+Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-const E=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const FQ={daily:"Daily",weekly:"Weekly",twice_monthly:"Every 15 days",monthly:"Monthly"};
-let me=null,tab="dash",D={};
-const fail=e=>{if(e){alert(e.message||e);throw e}};
