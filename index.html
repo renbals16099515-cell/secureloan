@@ -1,97 +1,31 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Secureloan</title>
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>K-easy Loan</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f5f7fb}
-*{box-sizing:border-box}body{margin:0}.wrap{max-width:1100px;margin:auto;padding:24px}
-header{background:#111827;color:#fff;padding:18px 24px;position:sticky;top:0;z-index:2}
-header .bar{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between}
-.logo{font-weight:800;font-size:22px}.btn{border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}
-.primary{background:#2563eb;color:#fff}.light{background:#eef2ff;color:#1d4ed8}.danger{background:#fee2e2;color:#991b1b}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 5px 20px #0000000a}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.hero{padding:44px 0}.muted{color:#667085}.hidden{display:none}
-input,select,textarea{width:100%;padding:12px;border:1px solid #d0d5dd;border-radius:10px;margin:6px 0 14px;background:#fff}
-label{font-size:13px;font-weight:700}.stat{font-size:28px;font-weight:800}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-nav{display:flex;gap:8px;margin:18px 0;flex-wrap:wrap}nav button{border:0;background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid #eee;font-size:14px}
-.notice{padding:12px;border-radius:10px;background:#eff6ff;color:#1e40af;margin:12px 0}
-@media(max-width:600px){.wrap{padding:14px}.hero{padding:28px 0}}
-</style>
-</head>
-<body>
-<header><div class="bar"><div class="logo">Secureloan</div><div id="userbar"></div></div></header>
-<main class="wrap">
-<section id="landing" class="hero">
-  <div class="card">
-    <h1>Simple, secure loan management</h1>
-    <p class="muted">Track loans, payments, schedules and borrower requests in one place.</p>
-    <button class="btn primary" onclick="show('auth')">Sign in / Create account</button>
-  </div>
-</section>
-
-<section id="auth" class="hidden">
- <div class="card" style="max-width:480px;margin:35px auto">
-  <h2>Secureloan Login</h2>
-  <p class="muted">Use email/password or Google.</p>
-  <label>Email</label><input id="email" type="email">
-  <label>Password</label><input id="password" type="password">
-  <div class="row">
-   <button class="btn primary" onclick="signIn()">Sign in</button>
-   <button class="btn light" onclick="signUp()">Create account</button>
-  </div>
-  <hr>
-  <button class="btn light" style="width:100%" onclick="googleLogin()">Continue with Google</button>
-  <p id="authmsg" class="notice hidden"></p>
- </div>
-</section>
-
-<section id="app" class="hidden">
- <div class="row" style="justify-content:space-between"><div><h1 id="welcome">Dashboard</h1><p id="role" class="muted"></p></div><button class="btn danger" onclick="signOut()">Sign out</button></div>
- <nav id="nav"></nav>
- <div id="content"></div>
-</section>
-</main>
-
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-const SUPABASE_URL = 'https://dccqbuzxpipsdqrjzwzk.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_b0HdhcRDtGP9a_ftZ1vIqg_XxlhesJf';
-const configured = !SUPABASE_URL.includes('PASTE_') && !SUPABASE_PUBLISHABLE_KEY.includes('PASTE_');
-const supabase = configured ? createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY) : null;
-let profile=null, loanCache=[];
-
-const $=id=>document.getElementById(id);
-window.show=(id)=>{['landing','auth','app'].forEach(x=>$(x).classList.add('hidden'));$(id).classList.remove('hidden')};
-function msg(t){$('authmsg').textContent=t;$('authmsg').classList.remove('hidden')}
-window.signIn=async()=>{if(!supabase)return msg('Add your Supabase URL and publishable key in this file first.');const {error}=await supabase.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)msg(error.message)};
-window.signUp=async()=>{if(!supabase)return msg('Add your Supabase URL and publishable key in this file first.');const {error}=await supabase.auth.signUp({email:$('email').value,password:$('password').value});msg(error?error.message:'Account created. Check your email if confirmation is enabled.')};
-window.googleLogin=async()=>{if(!supabase)return msg('Add your Supabase URL and publishable key in this file first.');const {error}=await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin}});if(error)msg(error.message)};
-window.signOut=async()=>{await supabase?.auth.signOut();show('landing');$('userbar').textContent=''};
-window.loadApp=async()=>{
- if(!supabase)return show('auth');
- const {data:{user}}=await supabase.auth.getUser(); if(!user)return show('landing');
- const {data:p,error}=await supabase.from('profiles').select('*').eq('id',user.id).single();
- if(error){msg(error.message);show('auth');return} profile=p;
- $('userbar').textContent=p.email||user.email; $('welcome').textContent=`Welcome, ${p.full_name||'User'}`;$('role').textContent=p.role==='lender'?'Lender / Admin':'Borrower';
- $('nav').innerHTML=p.role==='lender'
- ? '<button onclick="lenderDash()">Dashboard</button><button onclick="lenderLoans()">Loans</button><button onclick="lenderRequests()">Requests</button>'
- : '<button onclick="borrowerDash()">Dashboard</button><button onclick="borrowerLoans()">My Loans</button><button onclick="newRequest()">New Loan</button><button onclick="renewRequest()">Renewal</button>';
- show('app'); p.role==='lender'?lenderDash():borrowerDash();
-};
-window.borrowerDash=async()=>{const {data:loans}=await supabase.from('loans').select('*').eq('borrower_id',profile.id).order('created_at',{ascending:false});loanCache=loans||[];const total=loanCache.reduce((a,l)=>a+Number(l.total_payable||0),0);$('content').innerHTML=`<div class="grid"><div class="card"><div class="muted">Active loans</div><div class="stat">${loanCache.filter(x=>x.status==='active').length}</div></div><div class="card"><div class="muted">Total payable</div><div class="stat">₱${total.toLocaleString()}</div></div></div><div class="card" style="margin-top:16px"><h2>Payment tracking</h2><p class="muted">Open My Loans to view schedules and payment history.</p></div>`};
-window.borrowerLoans=async()=>{const {data:loans}=await supabase.from('loans').select('*').eq('borrower_id',profile.id).order('created_at',{ascending:false});let html='<div class="card"><h2>My Loans</h2><table><tr><th>Principal</th><th>Frequency</th><th>Installments</th><th>Status</th></tr>';for(const l of loans||[])html+=`<tr><td>₱${Number(l.principal).toLocaleString()}</td><td>${l.payment_frequency}</td><td>${l.installment_count}</td><td>${l.status}</td></tr>`;html+='</table></div>';$('content').innerHTML=html};
-window.newRequest=()=>requestForm('NEW');window.renewRequest=()=>requestForm('RENEWAL');
-function requestForm(type){$('content').innerHTML=`<div class="card" style="max-width:650px"><h2>${type==='NEW'?'New Loan Request':'Loan Renewal Request'}</h2><label>Requested amount</label><input id="rqAmount" type="number"><label>Preferred installments</label><input id="rqCount" type="number"><label>Payment frequency</label><select id="rqFreq"><option>daily</option><option>weekly</option><option>twice_monthly</option><option>monthly</option></select><label>Reason</label><textarea id="rqReason"></textarea><button class="btn primary" onclick="submitRequest('${type}')">Submit request</button></div>`}
-window.submitRequest=async(type)=>{const {error}=await supabase.from('loan_requests').insert({borrower_id:profile.id,type,requested_amount:Number($('rqAmount').value),requested_installments:Number($('rqCount').value),frequency:$('rqFreq').value,reason:$('rqReason').value});alert(error?error.message:'Request submitted.');if(!error)borrowerDash()};
-window.lenderDash=async()=>{const [{count:borrowers},{count:loans},{count:reqs}]=await Promise.all([supabase.from('profiles').select('*',{count:'exact',head:true}).eq('role','borrower'),supabase.from('loans').select('*',{count:'exact',head:true}),supabase.from('loan_requests').select('*',{count:'exact',head:true}).eq('status','pending')]);$('content').innerHTML=`<div class="grid"><div class="card"><div class="muted">Borrowers</div><div class="stat">${borrowers||0}</div></div><div class="card"><div class="muted">Loans</div><div class="stat">${loans||0}</div></div><div class="card"><div class="muted">Pending requests</div><div class="stat">${reqs||0}</div></div></div>`};
-window.lenderLoans=async()=>{const {data}=await supabase.from('loans').select('*,profiles(full_name,email)').order('created_at',{ascending:false});let html='<div class="card"><h2>All Loans</h2><table><tr><th>Borrower</th><th>Principal</th><th>Frequency</th><th>Installments</th><th>Status</th></tr>';for(const l of data||[])html+=`<tr><td>${l.profiles?.full_name||l.profiles?.email||'-'}</td><td>₱${Number(l.principal).toLocaleString()}</td><td>${l.payment_frequency}</td><td>${l.installment_count}</td><td>${l.status}</td></tr>`;html+='</table></div>';$('content').innerHTML=html};
-window.lenderRequests=async()=>{const {data}=await supabase.from('loan_requests').select('*,profiles(full_name,email)').order('created_at',{ascending:false});let html='<div class="card"><h2>Borrower Requests</h2><table><tr><th>Borrower</th><th>Type</th><th>Amount</th><th>Frequency</th><th>Status</th></tr>';for(const r of data||[])html+=`<tr><td>${r.profiles?.full_name||r.profiles?.email||'-'}</td><td>${r.type}</td><td>₱${Number(r.requested_amount).toLocaleString()}</td><td>${r.frequency||'-'}</td><td>${r.status}</td></tr>`;html+='</table></div>';$('content').innerHTML=html};
-
-if(supabase){supabase.auth.onAuthStateChange(()=>loadApp());loadApp()}else show('auth');
-</script>
-</body>
-</html>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#111827}
+header{background:#0f172a;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+header b{font-size:20px}header small{opacity:.7;display:block;font-size:12px}
+main{max-width:900px;margin:0 auto;padding:12px}
+.card{background:#fff;border-radius:12px;padding:14px;margin:10px 0;box-shadow:0 1px 3px #0001}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid .card{margin:0}
+.big{font-size:20px;font-weight:700}.lbl{font-size:12px;color:#6b7280}
+input,select,textarea{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:8px;margin:4px 0 10px;font-size:15px}
+button{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:14px;margin:2px}
+button.s{background:#e0e7ff;color:#1d4ed8}button.r{background:#fee2e2;color:#b91c1c}button.g{background:#dcfce7;color:#166534}
+nav{display:flex;gap:6px;overflow-x:auto;padding:4px 0}nav button{white-space:nowrap}
+nav button.on{background:#0f172a}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:#e5e7eb}.overdue,.past{background:#fecaca;color:#991b1b}.completed{background:#bbf7d0}.pending{background:#fde68a}
+.msg{color:#b91c1c;font-size:14px}.row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px;border-bottom:1px solid #eee;text-align:left}
+</style></head><body>
+<header><div><b>K-easy Loan</b><small id="who"></small></div><button class="s" id="out" style="display:none" onclick="sb.auth.signOut()">Log out</button></header>
+<main id="app"></main>
+<script>
+const sb=supabase.createClient("https://dccqbuzxpipsdqrjzwzk.supabase.co","sb_publishable_b0HdhcRDtGP9a_ftZ1vIqg_XxlhesJf");
+const $=id=>document.getElementById(id),app=$("app");
+const M=n=>"₱"+Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const E=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const FQ={daily:"Daily",weekly:"Weekly",twice_monthly:"Every 15 days",monthly:"Monthly"};
+let me=null,tab="dash",D={};
+const fail=e=>{if(e){alert(e.message||e);throw e}};
